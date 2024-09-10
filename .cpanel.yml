@@ -1,6 +1,6 @@
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/shippingout/public_html/shippingoutapp/
+    - export DEPLOYPATH=/home/shippingout/shippingoutapp.shippingout.thedevguys.co.nz/
     - /bin/cp -r * $DEPLOYPATH #copy all from root
     - /bin/cp -r ./public/* $DEPLOYPATH/public_html/
     - /bin/cp ./public/js/*.js $DEPLOYPATH/public_html/js

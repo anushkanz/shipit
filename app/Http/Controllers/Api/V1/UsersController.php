@@ -44,10 +44,19 @@ class UsersController extends Controller
     public function store(Request $request)
     {
         $user = User::where('email', $request->email)->first();
+        //$user = User::create($request->all());
 
         if($user == null){
-            $user = User::create($request->all());
-
+            $user = new User();
+            $user->fname  = $request->fname;
+            $user->lname  = $request->lname;
+            $user->mobile = $request->mobile;
+            $user->email  = $request->email;
+            $user->status = $request->status;
+            $user->type   = $request->type;
+            $user->password   = Hash::make($request->password);
+            $user->save();
+            
             if($request->accounttype == 'transporter'){
                 $transporter = new Transporter();
                 $transporter->user_id = $user->id;

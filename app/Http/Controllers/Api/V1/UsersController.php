@@ -47,19 +47,22 @@ class UsersController extends Controller
 
         if($user == null){
             $user = User::create($request->all());
-            $transporter = new Transporter();
-            $transporter->user_id = $user->id;
-            $transporter->legalname = 'n/a';
-            $transporter->nzbn = 'n/a';
-            $transporter->gst = 'n/a';
-            $transporter->inbusiness = '0';
-            $transporter->adderss = 'n/a';
-            $transporter->dlnumber = 'n/a';
-            $transporter->proof_identification = 'n/a';
-            $transporter->proof_address = 'n/a';
-            $transporter->public_profile = 'n/a';
-            $transporter->notification = 'n/a';
-            $transporter->save();
+
+            if($request->accounttype == 'transporter'){
+                $transporter = new Transporter();
+                $transporter->user_id = $user->id;
+                $transporter->legalname = 'n/a';
+                $transporter->nzbn = 'n/a';
+                $transporter->gst = 'n/a';
+                $transporter->inbusiness = '0';
+                $transporter->adderss = 'n/a';
+                $transporter->dlnumber = 'n/a';
+                $transporter->proof_identification = 'n/a';
+                $transporter->proof_address = 'n/a';
+                $transporter->public_profile = 'n/a';
+                $transporter->notification = 'n/a';
+                $transporter->save();
+            }
 
             return response()->json([
                 'status' => true,

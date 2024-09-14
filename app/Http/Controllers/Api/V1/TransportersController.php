@@ -15,8 +15,8 @@ class TransportersController extends Controller
     {
         return response()->json([
             'status' => true,
-            'message' => 'Nothing to show here',
-            'data' => $user
+            'message' => 'Nothing to show here index function',
+            'data' => ''
         ], 200);
     }
 
@@ -27,8 +27,8 @@ class TransportersController extends Controller
     {
         return response()->json([
             'status' => true,
-            'message' => 'Nothing to show here',
-            'data' => $user
+            'message' => 'Nothing to show here store function',
+            'data' => ''
         ], 200);
     }
 
@@ -39,8 +39,8 @@ class TransportersController extends Controller
     {
         return response()->json([
             'status' => true,
-            'message' => 'Nothing to show here',
-            'data' => $user
+            'message' => 'Nothing to show here show function',
+            'data' => ''
         ], 200);
     }
 
@@ -49,67 +49,79 @@ class TransportersController extends Controller
      */
     public function update(Request $request, string $id)
     {
+       
         $transporter = Transporter::where('user_id', $id)->firstOrFail();
+        // return response()->json([
+        //     'status' => true,
+        //     'message' => 'update',
+        //     'data' => $request->all()
+        // ], 200);
+        
+        //print_r( $request->all());
         /**
          *  We have 2 different interface to update
          *  update_type is business then update section of business area
          *  update_type is public then update public section
          *  update_type is notification then update notification
          */
-        if($transporter->tupdatetype == 'business'){
+        if($request->updatetype == 'business'){
             $transporter->user_id = $id;
-            $transporter->legalname = $request->tlegalname;
-            $transporter->nzbn = $request->tnzbn;
-            $transporter->gst = $request->tgst;
-            $transporter->inbusiness = $request->tyib;
-            $transporter->adderss = $request->tcaddress;
-            $transporter->dlnumber = $request->tdln;
-            //$transporter->tidentification = upload($request);
-            //$transporter->tcompanyaddressproof = upload($request);
+            $transporter->legalname = $request->legalname;
+            $transporter->nzbn = $request->nzbn	;
+            $transporter->gst = $request->gst;
+            $transporter->inbusiness = $request->inbusiness;
+            $transporter->adderss = $request->adderss;
+            $transporter->dlnumber = $request->dlnumber;
+            $transporter->proof_identification = $this->upload($request->proof_identification);
+            $transporter->proof_address = $this->upload($request->proof_address);
             $transporter->save();
 
             return response()->json([
                 'status' => true,
                 'message' => 'Successfuly updated business profile',
-                'data' => $user
+                'data' => $transporter
             ], 200);
-
-        }else if($transporter->tupdatetype == 'public'){
+        }
+        
+        if($request->updatetype == 'public'){
+            
             $public = array(
-                'public_name' => $request->tpublicprofile,
-                //'public_logo' => upload($request),
-                'public_about' => $request->taboutbusiness,
-                'public_transport_type' => $request->tmovingType,
-                'public_about' => $request->taboutbusiness,
-                'public_in_business' => $request->tvehiclecount,
-                'public_insurance_name' => $request->tinsuracename,
-                'public_insurance_cover' => $request->tinsurancecover,
-                'public_payment_menthod' => $request->tpaymentmethod,
-                'public_payment_time' => $request->tpaymenttime,
-                //'public_vehicles_photos' => upload($request),
+                'public_name' => $request->publicprofile,
+                'public_logo' => $this->upload($request->businessprofileimage),
+                'public_about' => $request->aboutbusiness,
+                'public_transport_type' => json_encode($request->movingtype),
+                'public_in_business' => $request->vehiclecount,
+                'public_insurance_name' => $request->insuracename,
+                'public_insurance_cover' => $request->insurancecover,
+                'public_payment_menthod' => $request->paymentmethod,
+                'public_payment_time' => $request->paymenttime,
+                'public_vehicles_photos' => $this->upload($request->vehiclephotos),
             );   
             $transporter->public_profile = json_encode($public);
             $transporter->save();
-
+            
             return response()->json([
                 'status' => true,
                 'message' => 'Successfuly updated public profile',
-                'data' => $user
+                'data' => $public
             ], 200);
+        }
+        
+        if($request->notificationupdatetype == 'notification'){
+            
+            $set_data = array();
+            foreach($request->emailnotification as $location){
+                $set_data[$location] = $request->notificationmovingtype;
+            }
 
-        }else if($transporter->update_type == 'notification'){
-            $notification_profile = array(
-                'locations' => $request->temailnotification,
-                'items' => $request->tmovingType
-            );
     
-            $transporter->notification = json_encode($notification_profile);
+            $transporter->notification = json_encode($set_data);
             $transporter->save();
 
             return response()->json([
                 'status' => true,
                 'message' => 'Successfuly updated business notification',
-                'data' => $user
+                'data' => $transporter
             ], 200);
         }
     }
@@ -121,24 +133,38 @@ class TransportersController extends Controller
     {
         //
     }
-
-    public function upload(Request $request){
-        $arr = [];
-        foreach($request->all() as $file){
-            if(is_file($file)){
-                $string = str_random(16);
-                $size = filesize($file);
-                $ext = $file->guessExtension();
-                $file_name = $string . '.' .  $ext;
-                $filepath = 'storage/uploads/' . $file_name;
-                $file->storeAs(('uploads/'), $file_name);
-
-                array_push($arr, [
-                    'name' => $file_name,
-                    'path' => $filepath,
-                ]);
+    function random_str(
+        int $length = 64,
+        string $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        ): string {
+            if ($length < 1) {
+                throw new \RangeException("Length must be a positive integer");
             }
+            $pieces = [];
+            $max = mb_strlen($keyspace, '8bit') - 1;
+            for ($i = 0; $i < $length; ++$i) {
+                $pieces []= $keyspace[random_int(0, $max)];
+            }
+        return implode('', $pieces);
+}
+
+    public function upload($request){
+        $arr = [];
+        foreach($request as $file){
+            $string = $this->random_str(32);
+            $size = filesize($file);
+            $ext = $file->guessExtension();
+            $file_name = $string . '.' .  $ext;
+            //$filepath = 'storage/uploads/' . $file_name;
+            $filePath = $file->storeAs('uploads', $file_name);
+            //$file->storeAs(('uploads/'), $file_name);
+            
+            array_push($arr, [
+                'name' => $file_name,
+                'path' => $filePath,
+            ]);
         }    
         return json_encode($arr);
+        
     }
 }

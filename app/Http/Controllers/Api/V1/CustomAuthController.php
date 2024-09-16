@@ -50,19 +50,39 @@ class CustomAuthController extends Controller
         ]);
 
         $tokenData = DB::table('password_resets')->where('email', $request->email)->first();
-        if ($this->sendResetEmail($request->email, $tokenData->token)) {
-            return response()->json([
-                'status' => true,
-                'message' => 'A reset link has been sent to your email address.',
-                'data' => ''
-            ], 200);
-        } else {
-            return response()->json([
-                'status' => true,
-                'message' => 'A Network Error occurred. Please try again.',
-                'data' => ''
-            ], 200);
-        }    
+        /**
+         * TESTING
+         **/ 
+        $user = DB::table('users')->where('email', $request->email)->first();
+        //Generate, the password reset link. The token generated is embedded in the link$link = config('base_url') . 'password/reset/' . $token . '?email=' . urlencode($user->email);
+        $msg = 'https://shippingout.thedevguys.co.nz/user-login/forgot-password/?token='. $tokenData->token . '&email=' . urlencode($user->email);
+    
+        return response()->json([
+            'status' => true,
+            'message' => 'A reset link has been sent to your email address.',
+            'data' => $msg
+        ], 200);
+            
+        // if ($this->sendResetEmail($request->email, $tokenData->token)) {
+        //     /**
+        //      * TESTING
+        //      **/ 
+        //     $user = DB::table('users')->where('email', $email)->first();
+        //     //Generate, the password reset link. The token generated is embedded in the link$link = config('base_url') . 'password/reset/' . $token . '?email=' . urlencode($user->email);
+        //     $msg = 'https://shippingout.thedevguys.co.nz/user-login/forgot-password/?token='. $token . '&email=' . urlencode($user->email);
+        
+        //     return response()->json([
+        //         'status' => true,
+        //         'message' => 'A reset link has been sent to your email address.',
+        //         'data' => $msg
+        //     ], 200);
+        // } else {
+        //     return response()->json([
+        //         'status' => true,
+        //         'message' => 'A Network Error occurred. Please try again.',
+        //         'data' => ''
+        //     ], 200);
+        // }    
     }
 
     public function resetPassword(Request $request)
@@ -131,7 +151,7 @@ class CustomAuthController extends Controller
 
     private function sendResetEmail($email, $token){
         //Retrieve the user from the database
-        $user = DB::table('users')->where('email', $email)->select('fname', 'email')->first();
+        $user = DB::table('users')->where('email', $email)->first();
         //Generate, the password reset link. The token generated is embedded in the link$link = config('base_url') . 'password/reset/' . $token . '?email=' . urlencode($user->email);
         $msg = 'https://shippingout.thedevguys.co.nz/user-login/forgot-password/?token='. $token . '&email=' . urlencode($user->email);
         try {

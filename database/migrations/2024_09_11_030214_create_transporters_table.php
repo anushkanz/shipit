@@ -20,10 +20,10 @@ return new class extends Migration
             $table->integer('inbusiness');
             $table->string('adderss');
             $table->string('dlnumber');
-            $table->string('proof_identification');
-            $table->string('proof_address');
-            $table->string('public_profile');
-            $table->string('notification');
+            $table->text('proof_identification');
+            $table->text('proof_address');
+            $table->text('public_profile');
+            $table->text('notification');
             $table->timestamps();
         });
     }

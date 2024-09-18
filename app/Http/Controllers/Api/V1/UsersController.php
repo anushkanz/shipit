@@ -47,19 +47,19 @@ class UsersController extends Controller
         //$user = User::create($request->all());
 
         if($user == null){
-            $user = new User();
-            $user->fname  = $request->fname;
-            $user->lname  = $request->lname;
-            $user->mobile = $request->mobile;
-            $user->email  = $request->email;
-            $user->status = $request->status;
-            $user->type   = $request->type;
-            $user->password   = Hash::make($request->password);
-            $user->save();
+            $user_created = User::create([
+                        'fname' => $request->fname,
+                        'lname' => $request->lname,
+                        'mobile'=> $request->mobile,
+                        'email' => $request->email,
+                        'status'=> $request->status,
+                        'type'  => $request->type,
+                        'password'=> Hash::make($request->password),
+                ]);
             
-            if($request->accounttype == 'transporter'){
+            if($request->type == 2){
                 $transporter = new Transporter();
-                $transporter->user_id = $user->id;
+                $transporter->user_id = $user_created->id;
                 $transporter->legalname = 'n/a';
                 $transporter->nzbn = 'n/a';
                 $transporter->gst = 'n/a';
@@ -76,13 +76,13 @@ class UsersController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Customer created successfully',
-                'data' => $user
+                'data' => $user_created
             ], 201);
 
         }else{
 
             return response()->json([
-                'status' => true,
+                'status' => false,
                 'message' => 'Email address already in our system',
                 'data' => ''
             ], 202);

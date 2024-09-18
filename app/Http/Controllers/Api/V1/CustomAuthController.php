@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeEmail;
 
 class CustomAuthController extends Controller
 {
@@ -144,7 +146,8 @@ class CustomAuthController extends Controller
         $msg = 'https://shippingout.thedevguys.co.nz/user-login/forgot-password/?token='. $token . '&email=' . urlencode($user->email);
         try {
         //Here send the link with CURL with an external email API         return true;
-            $mail = mail($email,"Password Reset Mail",$msg);
+            //$mail = mail($email,"Password Reset Mail",$msg);
+            $mail = Mail::to($email)->send(new WelcomeEmail());
             if(!$mail){
                 return true;
             }

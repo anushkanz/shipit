@@ -6,9 +6,9 @@
         <div class="flex flex-row">
             <div class="basis-1/4">
                 <ul class="list-none hover:list-disc">
-                    <li><a href="">My listings</a></li>
-                    <li><a href="">List an item</a></li>
-                    <li><a href="">Account details</a></li>
+                    <li><a href="{{ route('customer.listings') }}">My listings</a></li>
+                    <li><a href="{{ route('customer.listing.step_one' ,['step' => 1])  }}">List an item</a></li>
+                    <li><a href="{{ route('customer.account') }}">Account details</a></li>
                     <li><a href="{{ route('signout') }}">Logout</a></li>
                 </ul>
             </div>
